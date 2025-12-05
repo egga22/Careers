@@ -4,6 +4,7 @@ const svg = document.getElementById("map");
 const tooltip = document.getElementById("tooltip");
 const xAxisSelect = document.getElementById("x-axis");
 const yAxisSelect = document.getElementById("y-axis");
+const bubbleLabelSelect = document.getElementById("bubble-label");
 const zoomInBtn = document.getElementById("zoom-in");
 const zoomOutBtn = document.getElementById("zoom-out");
 const resetViewBtn = document.getElementById("reset-view");
@@ -17,6 +18,7 @@ const dimensions = {
 const state = {
   xMetric: xAxisSelect.value,
   yMetric: yAxisSelect.value,
+  labelMode: bubbleLabelSelect.value,
   scale: 1,
   translate: { x: 0, y: 0 },
 };
@@ -190,8 +192,13 @@ function drawPoints(xScale, yScale) {
   pointsGroup.innerHTML = "";
 
   careers.forEach((career) => {
-    const cx = xScale(metricValue(career, state.xMetric));
-    const cy = yScale(metricValue(career, state.yMetric));
+    const xValue = metricValue(career, state.xMetric);
+    const yValue = metricValue(career, state.yMetric);
+
+    const pointGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
+
+    const cx = xScale(xValue);
+    const cy = yScale(yValue);
 
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.classList.add("point");
@@ -207,8 +214,34 @@ function drawPoints(xScale, yScale) {
       window.location.href = `career.html?id=${encodeURIComponent(career.id)}`;
     });
 
-    pointsGroup.appendChild(circle);
+    pointGroup.appendChild(circle);
+    const labelTextValue = pointLabelText(career, xValue, yValue);
+    if (labelTextValue) {
+      const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
+      label.classList.add("point-label");
+      label.setAttribute("x", cx);
+      label.setAttribute("y", cy + 4);
+      label.textContent = labelTextValue;
+      pointGroup.appendChild(label);
+    }
+
+    pointsGroup.appendChild(pointGroup);
   });
+}
+
+function pointLabelText(career, xValue, yValue) {
+  switch (state.labelMode) {
+    case "name":
+      return career.name;
+    case "x":
+      return metricConfig[state.xMetric].formatter(xValue);
+    case "y":
+      return metricConfig[state.yMetric].formatter(yValue);
+    case "coordinates":
+      return `${metricConfig[state.xMetric].formatter(xValue)} | ${metricConfig[state.yMetric].formatter(yValue)}`;
+    default:
+      return "";
+  }
 }
 
 function showTooltip(event, career, cx, cy) {
@@ -220,21 +253,38 @@ function showTooltip(event, career, cx, cy) {
     <span class="metric">Y (${metricConfig[state.yMetric].label}): ${metricConfig[state.yMetric].formatter(yValue)}</span>
     <span class="metric">Median Salary: ${metricConfig.salary.formatter(career.medianSalary)}</span>
   `;
-
-  tooltip.style.left = `${event.clientX}px`;
-  tooltip.style.top = `${event.clientY}px`;
   tooltip.classList.add("visible");
   tooltip.setAttribute("aria-hidden", "false");
+  positionTooltip(event);
 }
 
 function moveTooltip(event) {
-  tooltip.style.left = `${event.clientX}px`;
-  tooltip.style.top = `${event.clientY}px`;
+  positionTooltip(event);
 }
 
 function hideTooltip() {
   tooltip.classList.remove("visible");
   tooltip.setAttribute("aria-hidden", "true");
+}
+
+function positionTooltip(event) {
+  const offset = 16;
+  const tooltipRect = tooltip.getBoundingClientRect();
+
+  let left = event.clientX + offset;
+  if (left + tooltipRect.width > window.innerWidth - 8) {
+    left = window.innerWidth - tooltipRect.width - 8;
+  }
+  left = Math.max(8, left);
+
+  let top = event.clientY + offset;
+  if (top + tooltipRect.height > window.innerHeight - 8) {
+    top = event.clientY - tooltipRect.height - offset;
+  }
+  top = Math.max(8, top);
+
+  tooltip.style.left = `${left}px`;
+  tooltip.style.top = `${top}px`;
 }
 
 function applyZoom() {
@@ -275,6 +325,11 @@ xAxisSelect.addEventListener("change", () => {
 
 yAxisSelect.addEventListener("change", () => {
   state.yMetric = yAxisSelect.value;
+  render();
+});
+
+bubbleLabelSelect.addEventListener("change", () => {
+  state.labelMode = bubbleLabelSelect.value;
   render();
 });
 
