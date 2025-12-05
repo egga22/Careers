@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Map</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="top-bar">
+    <h1>Career Map</h1>
+    <p class="subtitle">Explore careers across different comparison axes.</p>
+  </header>
+
+  <main class="layout">
+    <section class="controls">
+      <div class="control-group">
+        <label for="x-axis">X Axis</label>
+        <select id="x-axis">
+          <option value="alphabetical">Alphabetical</option>
+          <option value="salary">Median Salary</option>
+        </select>
+      </div>
+      <div class="control-group">
+        <label for="y-axis">Y Axis</label>
+        <select id="y-axis">
+          <option value="salary">Median Salary</option>
+          <option value="alphabetical">Alphabetical</option>
+        </select>
+      </div>
+      <div class="control-group zoom-controls">
+        <span>Zoom</span>
+        <button id="zoom-in" type="button">+</button>
+        <button id="zoom-out" type="button">-</button>
+        <button id="reset-view" type="button">Reset</button>
+      </div>
+    </section>
+
+    <section class="map-area">
+      <svg id="map" viewBox="0 0 800 500" role="img" aria-label="Career map"></svg>
+      <div id="tooltip" class="tooltip" aria-hidden="true"></div>
+    </section>
+  </main>
+
+  <script src="careers.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
