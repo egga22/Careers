@@ -1,0 +1,259 @@
+:root {
+  --bg: #0e1726;
+  --panel: #162236;
+  --text: #e8edf5;
+  --accent: #62b0e8;
+  --muted: #9bb0c7;
+  --grid: rgba(255, 255, 255, 0.04);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.detail-body {
+  background: radial-gradient(circle at 15% 20%, rgba(255, 255, 255, 0.04), transparent 32%),
+    var(--bg);
+}
+
+.top-bar {
+  padding: 24px;
+  background: linear-gradient(120deg, #12253f, #0f1c2e 45%, #0f1724);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.top-bar h1 {
+  margin: 0;
+  font-size: 28px;
+  letter-spacing: 0.5px;
+}
+
+.subtitle {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 14px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 16px;
+  padding: 16px 20px 32px;
+}
+
+.controls {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.25);
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.control-group label {
+  font-weight: 600;
+  color: var(--muted);
+}
+
+select,
+button {
+  background: #0f1928;
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 14px;
+}
+
+select {
+  flex: 1;
+}
+
+button {
+  cursor: pointer;
+  transition: background 0.2s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background: #13243c;
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+.zoom-controls {
+  gap: 8px;
+}
+
+.zoom-controls span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.map-area {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 12px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.25);
+}
+
+#map {
+  width: 100%;
+  height: 600px;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.03), transparent 35%),
+    radial-gradient(circle at 80% 10%, rgba(255, 255, 255, 0.05), transparent 40%),
+    #0f1724;
+  border-radius: 10px;
+}
+
+.grid line {
+  stroke: var(--grid);
+  stroke-width: 1;
+}
+
+.axis {
+  stroke: rgba(255, 255, 255, 0.25);
+  stroke-width: 1.5;
+}
+
+.axis-label {
+  fill: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.ticks text {
+  fill: var(--muted);
+  font-size: 12px;
+}
+
+.point {
+  fill: var(--accent);
+  opacity: 0.92;
+  stroke: rgba(255, 255, 255, 0.2);
+  stroke-width: 2;
+  cursor: pointer;
+  transition: transform 0.15s ease, fill 0.15s ease;
+}
+
+.point:hover {
+  fill: #80c8ff;
+}
+
+.tooltip {
+  position: absolute;
+  pointer-events: none;
+  background: rgba(12, 17, 30, 0.9);
+  color: var(--text);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 10px;
+  padding: 10px 12px;
+  font-size: 13px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.4);
+  transform: translate(-50%, -120%);
+  min-width: 180px;
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+  z-index: 10;
+}
+
+.tooltip.visible {
+  opacity: 1;
+  transform: translate(-50%, -110%);
+}
+
+.tooltip .name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.tooltip .metric {
+  color: var(--muted);
+  margin-top: 4px;
+  display: block;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  #map {
+    height: 440px;
+  }
+}
+
+.detail-layout {
+  max-width: 780px;
+  margin: 24px auto 60px;
+  padding: 0 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.detail-card {
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 28px;
+  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.25);
+}
+
+.detail-card h2 {
+  margin-top: 0;
+  margin-bottom: 6px;
+  font-size: 26px;
+}
+
+.detail-card .muted {
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.detail-card .salary {
+  font-size: 32px;
+  margin: 6px 0 16px;
+  font-weight: 700;
+}
+
+.detail-card .note {
+  margin: 0;
+  color: var(--muted);
+}
+
+.back-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  width: fit-content;
+  margin-left: 4px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}

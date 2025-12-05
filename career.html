@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Career Profile</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body class="detail-body">
+  <header class="top-bar">
+    <h1>Career Profile</h1>
+    <p class="subtitle">Quick view of the selected career.</p>
+  </header>
+
+  <main class="detail-layout">
+    <section class="detail-card" id="detail-card">
+      <p>Loading career information...</p>
+    </section>
+    <a class="back-link" href="index.html">← Back to map</a>
+  </main>
+
+  <script src="careers.js"></script>
+  <script>
+    const careers = window.careersData || [];
+
+    function getCareerById(id) {
+      return careers.find((career) => career.id === id);
+    }
+
+    function formatCurrency(amount) {
+      return `$${amount.toLocaleString()}`;
+    }
+
+    function renderCareer() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+      const container = document.getElementById("detail-card");
+
+      const career = getCareerById(id);
+      if (!career) {
+        container.innerHTML = `<h2>Career not found</h2><p>The selected career could not be located.</p>`;
+        return;
+      }
+
+      container.innerHTML = `
+        <h2>${career.name}</h2>
+        <p class="muted">Median Salary</p>
+        <p class="salary">${formatCurrency(career.medianSalary)}</p>
+        <p class="note">More details will appear here as the database grows.</p>
+      `;
+    }
+
+    renderCareer();
+  </script>
+</body>
+</html>
