@@ -4,6 +4,8 @@ const svg = document.getElementById("map");
 const tooltip = document.getElementById("tooltip");
 const xAxisSelect = document.getElementById("x-axis");
 const yAxisSelect = document.getElementById("y-axis");
+const xScaleSelect = document.getElementById("x-scale");
+const yScaleSelect = document.getElementById("y-scale");
 const bubbleLabelSelect = document.getElementById("bubble-label");
 const zoomInBtn = document.getElementById("zoom-in");
 const zoomOutBtn = document.getElementById("zoom-out");
@@ -18,6 +20,8 @@ const dimensions = {
 const state = {
   xMetric: xAxisSelect.value,
   yMetric: yAxisSelect.value,
+  xScaleType: xScaleSelect.value,
+  yScaleType: yScaleSelect.value,
   labelMode: bubbleLabelSelect.value,
   scale: 1,
   translate: { x: 0, y: 0 },
@@ -80,22 +84,66 @@ function metricDomain(metric) {
   return [min - padding, max + padding];
 }
 
-function createScale(domain, range) {
+function safeDomain(domain, scaleType) {
+  if (scaleType !== "log") return domain;
+
+  let [min, max] = domain;
+  if (max <= 0) {
+    max = 1;
+  }
+  if (min <= 0) {
+    min = Math.max(Math.min(max, 1), Number.EPSILON);
+  }
+  return [min, max];
+}
+
+function createScale(domain, range, scaleType) {
   const [d0, d1] = domain;
   const [r0, r1] = range;
+
+  if (scaleType === "log") {
+    const log0 = Math.log10(d0);
+    const log1 = Math.log10(d1);
+    const m = (r1 - r0) / (log1 - log0);
+    return (value) => r0 + (Math.log10(value) - log0) * m;
+  }
+
   const m = (r1 - r0) / (d1 - d0);
   return (value) => r0 + (value - d0) * m;
 }
 
-function drawGrid(xScale, yScale, xDomain, yDomain) {
+function generateTicks(domain, scaleType, count = 5) {
+  if (scaleType === "log") {
+    const [min, max] = domain;
+    const startPower = Math.ceil(Math.log10(min));
+    const endPower = Math.floor(Math.log10(max));
+    const ticks = [min];
+
+    for (let p = startPower; p <= endPower; p++) {
+      ticks.push(10 ** p);
+    }
+
+    ticks.push(max);
+
+    const uniqueTicks = Array.from(new Set(ticks)).filter(
+      (tick) => tick >= min && tick <= max
+    );
+
+    return uniqueTicks.sort((a, b) => a - b);
+  }
+
+  const ticks = [];
+  for (let i = 0; i <= count; i++) {
+    const t = i / count;
+    ticks.push(domain[0] + (domain[1] - domain[0]) * t);
+  }
+  return ticks;
+}
+
+function drawGrid(xScale, yScale, xTicks, yTicks) {
   gridGroup.innerHTML = "";
 
-  const xLines = 5;
-  const yLines = 5;
-
-  for (let i = 0; i <= xLines; i++) {
-    const t = i / xLines;
-    const value = xDomain[0] + (xDomain[1] - xDomain[0]) * t;
+  xTicks.forEach((value) => {
     const x = xScale(value);
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", x);
@@ -103,11 +151,9 @@ function drawGrid(xScale, yScale, xDomain, yDomain) {
     line.setAttribute("y1", 0);
     line.setAttribute("y2", chartHeight);
     gridGroup.appendChild(line);
-  }
+  });
 
-  for (let i = 0; i <= yLines; i++) {
-    const t = i / yLines;
-    const value = yDomain[0] + (yDomain[1] - yDomain[0]) * t;
+  yTicks.forEach((value) => {
     const y = yScale(value);
     const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
     line.setAttribute("x1", 0);
@@ -115,10 +161,10 @@ function drawGrid(xScale, yScale, xDomain, yDomain) {
     line.setAttribute("y1", y);
     line.setAttribute("y2", y);
     gridGroup.appendChild(line);
-  }
+  });
 }
 
-function drawAxes(xScale, yScale, xDomain, yDomain) {
+function drawAxes(xScale, yScale, xTicks, yTicks) {
   axesGroup.innerHTML = "";
 
   const xAxisLine = document.createElementNS("http://www.w3.org/2000/svg", "line");
@@ -140,26 +186,23 @@ function drawAxes(xScale, yScale, xDomain, yDomain) {
   const ticksGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
   ticksGroup.classList.add("ticks");
 
-  const tickCount = 5;
-  for (let i = 0; i <= tickCount; i++) {
-    const t = i / tickCount;
-    const xValue = xDomain[0] + (xDomain[1] - xDomain[0]) * t;
-    const yValue = yDomain[0] + (yDomain[1] - yDomain[0]) * t;
-
+  xTicks.forEach((xValue) => {
     const xTick = document.createElementNS("http://www.w3.org/2000/svg", "text");
     xTick.textContent = formatTick(state.xMetric, xValue);
     xTick.setAttribute("x", xScale(xValue));
     xTick.setAttribute("y", chartHeight + 24);
     xTick.setAttribute("text-anchor", "middle");
     ticksGroup.appendChild(xTick);
+  });
 
+  yTicks.forEach((yValue) => {
     const yTick = document.createElementNS("http://www.w3.org/2000/svg", "text");
     yTick.textContent = formatTick(state.yMetric, yValue);
     yTick.setAttribute("x", -12);
     yTick.setAttribute("y", yScale(yValue) + 4);
     yTick.setAttribute("text-anchor", "end");
     ticksGroup.appendChild(yTick);
-  }
+  });
 
   axesGroup.appendChild(ticksGroup);
 
@@ -307,14 +350,17 @@ function resetView() {
 }
 
 function render() {
-  const xDomain = metricDomain(state.xMetric);
-  const yDomain = metricDomain(state.yMetric);
+  const xDomain = safeDomain(metricDomain(state.xMetric), state.xScaleType);
+  const yDomain = safeDomain(metricDomain(state.yMetric), state.yScaleType);
 
-  const xScale = createScale(xDomain, [0, chartWidth]);
-  const yScale = createScale(yDomain, [chartHeight, 0]);
+  const xScale = createScale(xDomain, [0, chartWidth], state.xScaleType);
+  const yScale = createScale(yDomain, [chartHeight, 0], state.yScaleType);
 
-  drawGrid(xScale, yScale, xDomain, yDomain);
-  drawAxes(xScale, yScale, xDomain, yDomain);
+  const xTicks = generateTicks(xDomain, state.xScaleType);
+  const yTicks = generateTicks(yDomain, state.yScaleType);
+
+  drawGrid(xScale, yScale, xTicks, yTicks);
+  drawAxes(xScale, yScale, xTicks, yTicks);
   drawPoints(xScale, yScale);
 }
 
@@ -325,6 +371,16 @@ xAxisSelect.addEventListener("change", () => {
 
 yAxisSelect.addEventListener("change", () => {
   state.yMetric = yAxisSelect.value;
+  render();
+});
+
+xScaleSelect.addEventListener("change", () => {
+  state.xScaleType = xScaleSelect.value;
+  render();
+});
+
+yScaleSelect.addEventListener("change", () => {
+  state.yScaleType = yScaleSelect.value;
   render();
 });
 
