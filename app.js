@@ -202,7 +202,7 @@ function drawPoints(xScale, yScale) {
 
     const circle = document.createElementNS("http://www.w3.org/2000/svg", "circle");
     circle.classList.add("point");
-    circle.setAttribute("r", 12);
+    circle.setAttribute("r", 18);
     circle.setAttribute("cx", cx);
     circle.setAttribute("cy", cy);
     circle.dataset.id = career.id;
@@ -220,7 +220,7 @@ function drawPoints(xScale, yScale) {
       const label = document.createElementNS("http://www.w3.org/2000/svg", "text");
       label.classList.add("point-label");
       label.setAttribute("x", cx);
-      label.setAttribute("y", cy + 4);
+      label.setAttribute("y", cy + 5);
       label.textContent = labelTextValue;
       pointGroup.appendChild(label);
     }
