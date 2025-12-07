@@ -53,14 +53,19 @@
         return;
       }
 
-      const cluster = findClusterById(career.clusterId);
-      const sector = findSectorById(career.sectorId);
+      const categoryList = career.categories
+        .map((category) => {
+          const cluster = findClusterById(category.clusterId);
+          const sector = findSectorById(category.sectorId);
+          return `${cluster?.name || category.clusterId} → ${sector?.name || category.sectorId} → ${category.industry}`;
+        })
+        .join("<br>");
 
       container.innerHTML = `
         <h2>${career.name}</h2>
         <p class="muted">Median Salary</p>
         <p class="salary">${formatCurrency(career.medianSalary)}</p>
-        <p class="note">${cluster?.name || career.clusterId} → ${sector?.name || career.sectorId} → ${career.industry}</p>
+        <p class="note">${categoryList}</p>
         <p class="note">More details will appear here as the database grows.</p>
       `;
     }
