@@ -22,9 +22,20 @@
   <script src="careers.js"></script>
   <script>
     const careers = window.careersData || [];
+    const taxonomy = window.careerTaxonomy || { clusters: [] };
 
     function getCareerById(id) {
       return careers.find((career) => career.id === id);
+    }
+
+    function findClusterById(clusterId) {
+      return taxonomy.clusters.find((cluster) => cluster.id === clusterId);
+    }
+
+    function findSectorById(sectorId) {
+      return taxonomy.clusters
+        .flatMap((cluster) => cluster.sectors.map((sector) => ({ ...sector, clusterId: cluster.id })))
+        .find((sector) => sector.id === sectorId);
     }
 
     function formatCurrency(amount) {
@@ -42,10 +53,14 @@
         return;
       }
 
+      const cluster = findClusterById(career.clusterId);
+      const sector = findSectorById(career.sectorId);
+
       container.innerHTML = `
         <h2>${career.name}</h2>
         <p class="muted">Median Salary</p>
         <p class="salary">${formatCurrency(career.medianSalary)}</p>
+        <p class="note">${cluster?.name || career.clusterId} → ${sector?.name || career.sectorId} → ${career.industry}</p>
         <p class="note">More details will appear here as the database grows.</p>
       `;
     }
