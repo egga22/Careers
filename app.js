@@ -28,7 +28,7 @@ const state = {
   xScaleType: xScaleSelect.value,
   yScaleType: yScaleSelect.value,
   labelMode: bubbleLabelSelect.value,
-  filters: { cluster: "all", sector: "all", industry: "all" },
+  filters: { clusters: [], sectors: [], industries: [] },
   scale: 1,
   translate: { x: 0, y: 0 },
 };
@@ -71,12 +71,13 @@ function getCurrentCareers() {
   return filteredCareers.length ? filteredCareers : allCareers;
 }
 
-function buildSelectOptions(select, options) {
+function buildSelectOptions(select, options, selectedValues = []) {
   select.innerHTML = "";
   options.forEach(({ value, label }) => {
     const option = document.createElement("option");
     option.value = value;
     option.textContent = label;
+    option.selected = selectedValues.includes(value);
     select.appendChild(option);
   });
 }
@@ -90,49 +91,75 @@ function populateClusterSelect() {
     })),
   ];
 
-  buildSelectOptions(clusterFilterSelect, clusterOptions);
+  const selectedValues = state.filters.clusters.length
+    ? state.filters.clusters
+    : ["all"];
+
+  buildSelectOptions(clusterFilterSelect, clusterOptions, selectedValues);
 }
 
-function populateSectorSelect(clusterId) {
-  const sectors = clusterId === "all"
-    ? taxonomy.clusters.flatMap((cluster) => cluster.sectors)
-    : taxonomy.clusters.find((cluster) => cluster.id === clusterId)?.sectors || [];
+function populateSectorSelect(selectedClusters) {
+  const activeClusters = selectedClusters.length
+    ? taxonomy.clusters.filter((cluster) => selectedClusters.includes(cluster.id))
+    : taxonomy.clusters;
 
-  const sectorOptions = [{ value: "all", label: "All Sectors" },
-    ...sectors.map((sector) => ({ value: sector.id, label: sector.name }))];
+  const sectors = activeClusters.flatMap((cluster) => cluster.sectors);
 
-  buildSelectOptions(sectorFilterSelect, sectorOptions);
+  const sectorOptions = [
+    { value: "all", label: "All Sectors" },
+    ...sectors.map((sector) => ({ value: sector.id, label: sector.name })),
+  ];
+
+  const selectedValues = state.filters.sectors.length
+    ? state.filters.sectors
+    : ["all"];
+
+  buildSelectOptions(sectorFilterSelect, sectorOptions, selectedValues);
 }
 
-function populateIndustrySelect(sectorId, clusterId) {
-  let industries = [];
+function populateIndustrySelect(selectedSectors, selectedClusters) {
+  const activeClusters = selectedClusters.length
+    ? taxonomy.clusters.filter((cluster) => selectedClusters.includes(cluster.id))
+    : taxonomy.clusters;
 
-  if (sectorId === "all") {
-    const sectors = clusterId === "all"
-      ? taxonomy.clusters.flatMap((cluster) => cluster.sectors)
-      : taxonomy.clusters.find((cluster) => cluster.id === clusterId)?.sectors || [];
-    industries = sectors.flatMap((sector) => sector.industries);
-  } else {
-    const cluster = taxonomy.clusters.find((c) => c.id === clusterId) ||
-      taxonomy.clusters.find((c) => c.sectors.some((s) => s.id === sectorId));
-    industries = cluster?.sectors.find((sector) => sector.id === sectorId)?.industries || [];
-  }
+  const activeSectors = selectedSectors.length
+    ? activeClusters
+        .flatMap((cluster) => cluster.sectors.map((sector) => ({ ...sector, clusterId: cluster.id })))
+        .filter((sector) => selectedSectors.includes(sector.id))
+    : activeClusters.flatMap((cluster) => cluster.sectors.map((sector) => ({ ...sector, clusterId: cluster.id })));
 
-  const options = [{ value: "all", label: "All Industries" },
-    ...industries.map((industry) => ({ value: industry, label: industry }))];
+  const industries = [...new Set(activeSectors.flatMap((sector) => sector.industries))];
 
-  buildSelectOptions(industryFilterSelect, options);
+  const options = [
+    { value: "all", label: "All Industries" },
+    ...industries.map((industry) => ({ value: industry, label: industry })),
+  ];
+
+  const selectedValues = state.filters.industries.length
+    ? state.filters.industries
+    : ["all"];
+
+  buildSelectOptions(industryFilterSelect, options, selectedValues);
 }
 
 function applyFilters() {
   filteredCareers = allCareers.filter((career) => {
-    if (state.filters.cluster !== "all" && career.clusterId !== state.filters.cluster) {
+    if (
+      state.filters.clusters.length &&
+      !state.filters.clusters.some((clusterId) => career.clusterIds.includes(clusterId))
+    ) {
       return false;
     }
-    if (state.filters.sector !== "all" && career.sectorId !== state.filters.sector) {
+    if (
+      state.filters.sectors.length &&
+      !state.filters.sectors.some((sectorId) => career.sectorIds.includes(sectorId))
+    ) {
       return false;
     }
-    if (state.filters.industry !== "all" && career.industry !== state.filters.industry) {
+    if (
+      state.filters.industries.length &&
+      !state.filters.industries.some((industry) => career.industries.includes(industry))
+    ) {
       return false;
     }
     return true;
@@ -391,13 +418,18 @@ function pointLabelText(career, xValue, yValue) {
 function showTooltip(event, career, cx, cy) {
   const xValue = metricValue(career, state.xMetric);
   const yValue = metricValue(career, state.yMetric);
+  const categoryList = career.categories
+    .map(
+      (category) =>
+        `${getClusterName(category.clusterId)} → ${getSectorName(category.sectorId)} → ${category.industry}`
+    )
+    .join("<br>");
   tooltip.innerHTML = `
     <div class="name">${career.name}</div>
     <span class="metric">X (${metricConfig[state.xMetric].label}): ${metricConfig[state.xMetric].formatter(xValue)}</span>
     <span class="metric">Y (${metricConfig[state.yMetric].label}): ${metricConfig[state.yMetric].formatter(yValue)}</span>
     <span class="metric">Median Salary: ${metricConfig.salary.formatter(career.medianSalary)}</span>
-    <span class="metric">Cluster: ${getClusterName(career.clusterId)}</span>
-    <span class="metric">Sector: ${getSectorName(career.sectorId)} · Industry: ${career.industry}</span>
+    <span class="metric">Category: ${categoryList}</span>
   `;
   tooltip.classList.add("visible");
   tooltip.setAttribute("aria-hidden", "false");
@@ -492,29 +524,32 @@ bubbleLabelSelect.addEventListener("change", () => {
   render();
 });
 
+function getSelectedValues(select) {
+  return Array.from(select.selectedOptions)
+    .map((option) => option.value)
+    .filter((value) => value !== "all");
+}
+
 clusterFilterSelect.addEventListener("change", () => {
-  state.filters.cluster = clusterFilterSelect.value;
-  state.filters.sector = "all";
-  state.filters.industry = "all";
-  populateSectorSelect(state.filters.cluster);
-  sectorFilterSelect.value = state.filters.sector;
-  populateIndustrySelect(state.filters.sector, state.filters.cluster);
-  industryFilterSelect.value = state.filters.industry;
+  state.filters.clusters = getSelectedValues(clusterFilterSelect);
+  state.filters.sectors = [];
+  state.filters.industries = [];
+  populateSectorSelect(state.filters.clusters);
+  populateIndustrySelect(state.filters.sectors, state.filters.clusters);
   applyFilters();
   render();
 });
 
 sectorFilterSelect.addEventListener("change", () => {
-  state.filters.sector = sectorFilterSelect.value;
-  state.filters.industry = "all";
-  populateIndustrySelect(state.filters.sector, state.filters.cluster);
-  industryFilterSelect.value = state.filters.industry;
+  state.filters.sectors = getSelectedValues(sectorFilterSelect);
+  state.filters.industries = [];
+  populateIndustrySelect(state.filters.sectors, state.filters.clusters);
   applyFilters();
   render();
 });
 
 industryFilterSelect.addEventListener("change", () => {
-  state.filters.industry = industryFilterSelect.value;
+  state.filters.industries = getSelectedValues(industryFilterSelect);
   applyFilters();
   render();
 });
@@ -524,10 +559,8 @@ zoomOutBtn.addEventListener("click", () => handleZoom("out"));
 resetViewBtn.addEventListener("click", resetView);
 
 populateClusterSelect();
-populateSectorSelect(state.filters.cluster);
-sectorFilterSelect.value = state.filters.sector;
-populateIndustrySelect(state.filters.sector, state.filters.cluster);
-industryFilterSelect.value = state.filters.industry;
+populateSectorSelect(state.filters.clusters);
+populateIndustrySelect(state.filters.sectors, state.filters.clusters);
 applyFilters();
 applyZoom();
 render();

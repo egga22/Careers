@@ -957,18 +957,31 @@ const defaultCategory = {
   industry: "Small Business",
 };
 
-function applyCategory(id) {
-  for (const rule of categoryRules) {
-    if (rule.ids.has(id)) {
-      return rule.category;
-    }
+function applyCategories(id) {
+  const categories = categoryRules
+    .filter((rule) => rule.ids.has(id))
+    .map((rule) => rule.category);
+
+  if (categories.length) {
+    return categories;
   }
-  return defaultCategory;
+
+  return [defaultCategory];
 }
 
-window.careersData = baseCareers.map((career) => ({
-  ...career,
-  ...applyCategory(career.id),
-}));
+window.careersData = baseCareers.map((career) => {
+  const categories = applyCategories(career.id);
+  const clusterIds = [...new Set(categories.map((category) => category.clusterId))];
+  const sectorIds = [...new Set(categories.map((category) => category.sectorId))];
+  const industries = [...new Set(categories.map((category) => category.industry))];
+
+  return {
+    ...career,
+    categories,
+    clusterIds,
+    sectorIds,
+    industries,
+  };
+});
 
 window.careerTaxonomy = careerTaxonomy;
