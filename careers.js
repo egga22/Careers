@@ -265,6 +265,9 @@ const careerTaxonomy = {
             "Environmental Science",
             "Physics Research",
             "Data Science",
+            "Chemistry Research",
+            "Geospatial Science",
+            "Forensic Science",
           ],
         },
         {
@@ -280,6 +283,58 @@ const careerTaxonomy = {
       ],
     },
     {
+      id: "hospitality-retail-services",
+      name: "Hospitality, Retail & Services",
+      sectors: [
+        {
+          id: "food-beverage-service",
+          name: "Food & Beverage Service",
+          industries: [
+            "Culinary Arts",
+            "Food & Beverage Service",
+            "Baking & Pastry",
+          ],
+        },
+        {
+          id: "hospitality-tourism",
+          name: "Hospitality & Tourism",
+          industries: [
+            "Lodging Management",
+            "Travel & Tourism",
+            "Passenger Transport",
+          ],
+        },
+        {
+          id: "personal-wellness-services",
+          name: "Personal & Wellness Services",
+          industries: [
+            "Hair & Beauty",
+            "Spa & Wellness",
+            "Fitness & Coaching",
+            "Pet Care & Training",
+          ],
+        },
+        {
+          id: "facilities-outdoor",
+          name: "Facilities & Outdoor",
+          industries: [
+            "Custodial & Housekeeping",
+            "Groundskeeping & Landscaping",
+            "Agriculture & Farming",
+          ],
+        },
+        {
+          id: "retail-customer-service",
+          name: "Retail & Customer Support",
+          industries: [
+            "Retail & Customer Service",
+            "Specialty Shops & Floral",
+            "Apparel & Tailoring",
+          ],
+        },
+      ],
+    },
+    {
       id: "business-finance",
       name: "Business & Finance",
       sectors: [
@@ -290,12 +345,20 @@ const careerTaxonomy = {
             "Corporate Management",
             "Human Resources",
             "Operations Management",
+            "Administrative Support",
+            "Business Analysis",
           ],
         },
         {
           id: "finance-investing",
           name: "Finance & Investing",
-          industries: ["Investment Banking", "Accounting", "Insurance", "Real Estate"],
+          industries: [
+            "Investment Banking",
+            "Accounting",
+            "Insurance",
+            "Real Estate",
+            "Banking Services",
+          ],
         },
         {
           id: "marketing-sales",
@@ -326,12 +389,27 @@ const careerTaxonomy = {
         {
           id: "performing-arts",
           name: "Performing Arts",
-          industries: ["Music Production", "Acting", "Dance", "Theatre Production"],
+          industries: [
+            "Music Production",
+            "Acting",
+            "Dance",
+            "Theatre Production",
+            "Fashion & Modeling",
+          ],
         },
         {
           id: "writing-journalism",
           name: "Writing, Journalism & Communications",
           industries: ["Journalism", "Copywriting", "Editing", "Broadcast Media"],
+        },
+        {
+          id: "museums-archives-history",
+          name: "Museums, Archives & History",
+          industries: [
+            "Museums & Curation",
+            "Archives & Library Science",
+            "History & Cultural Preservation",
+          ],
         },
       ],
     },
@@ -342,7 +420,16 @@ const careerTaxonomy = {
         {
           id: "medical-clinical",
           name: "Medical & Clinical",
-          industries: ["Nursing", "Medicine", "Dentistry", "Pharmacy"],
+          industries: [
+            "Nursing",
+            "Medicine",
+            "Dentistry",
+            "Pharmacy",
+            "Clinical Research",
+            "Nutrition & Dietetics",
+            "Healthcare Administration",
+            "Veterinary Medicine",
+          ],
         },
         {
           id: "mental-health-social",
@@ -352,6 +439,7 @@ const careerTaxonomy = {
             "Social Work",
             "Rehabilitation Services",
             "Public Health",
+            "Funeral Services & Bereavement Support",
           ],
         },
         {
@@ -373,7 +461,15 @@ const careerTaxonomy = {
         {
           id: "skilled-trades",
           name: "Skilled Trades",
-          industries: ["Construction", "Carpentry", "Electricians", "Plumbing"],
+          industries: [
+            "Construction",
+            "Carpentry",
+            "Electricians",
+            "Plumbing",
+            "Automotive & Aviation Repair",
+            "Metalwork & Fabrication",
+            "Painting & Finishing",
+          ],
         },
         {
           id: "legal",
@@ -696,28 +792,15 @@ const categoryRules = [
     },
   },
   {
-    ids: new Set([
-      "business-owner-small",
-      "farmer",
-      "barber",
-      "baker",
-      "butcher",
-      "florist",
-      "fashion-designer",
-      "cosmetologist",
-      "makeup-artist",
-      "hair-stylist",
-      "groundskeeper",
-      "janitor",
-      "waiter",
-      "bartender",
-      "tour-guide",
-      "tax-preparer",
-      "restaurant-manager",
-      "hotel-manager",
-      "chef",
-      "cookie-decorator",
-    ]),
+    ids: new Set(["logistician", "supply-chain-manager", "courier", "truck-driver"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "entrepreneurship-operations",
+      industry: "Supply Chain & Logistics",
+    },
+  },
+  {
+    ids: new Set(["business-owner-small"]),
     category: {
       clusterId: "business-finance",
       sectorId: "entrepreneurship-operations",
@@ -725,11 +808,275 @@ const categoryRules = [
     },
   },
   {
-    ids: new Set(["logistician", "supply-chain-manager", "courier", "truck-driver"]),
+    ids: new Set(["business-analyst"]),
     category: {
       clusterId: "business-finance",
-      sectorId: "entrepreneurship-operations",
-      industry: "Supply Chain & Logistics",
+      sectorId: "management",
+      industry: "Business Analysis",
+    },
+  },
+  {
+    ids: new Set(["receptionist", "office-manager", "administrative-assistant"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "management",
+      industry: "Administrative Support",
+    },
+  },
+  {
+    ids: new Set(["bank-teller"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "finance-investing",
+      industry: "Banking Services",
+    },
+  },
+  {
+    ids: new Set(["chef", "baker", "cookie-decorator", "butcher"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "food-beverage-service",
+      industry: "Culinary Arts",
+    },
+  },
+  {
+    ids: new Set(["waiter", "bartender", "restaurant-manager"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "food-beverage-service",
+      industry: "Food & Beverage Service",
+    },
+  },
+  {
+    ids: new Set(["hotel-manager"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "hospitality-tourism",
+      industry: "Lodging Management",
+    },
+  },
+  {
+    ids: new Set(["tour-guide"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "hospitality-tourism",
+      industry: "Travel & Tourism",
+    },
+  },
+  {
+    ids: new Set(["flight-attendant", "bus-driver"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "hospitality-tourism",
+      industry: "Passenger Transport",
+    },
+  },
+  {
+    ids: new Set(["barber", "hair-stylist", "cosmetologist", "makeup-artist"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "personal-wellness-services",
+      industry: "Hair & Beauty",
+    },
+  },
+  {
+    ids: new Set(["massage-therapist"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "personal-wellness-services",
+      industry: "Spa & Wellness",
+    },
+  },
+  {
+    ids: new Set(["fitness-trainer", "personal-trainer"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "personal-wellness-services",
+      industry: "Fitness & Coaching",
+    },
+  },
+  {
+    ids: new Set(["dog-trainer"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "personal-wellness-services",
+      industry: "Pet Care & Training",
+    },
+  },
+  {
+    ids: new Set(["janitor"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "facilities-outdoor",
+      industry: "Custodial & Housekeeping",
+    },
+  },
+  {
+    ids: new Set(["groundskeeper", "landscaper"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "facilities-outdoor",
+      industry: "Groundskeeping & Landscaping",
+    },
+  },
+  {
+    ids: new Set(["farmer"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "facilities-outdoor",
+      industry: "Agriculture & Farming",
+    },
+  },
+  {
+    ids: new Set(["cashier"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "retail-customer-service",
+      industry: "Retail & Customer Service",
+    },
+  },
+  {
+    ids: new Set(["florist"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "retail-customer-service",
+      industry: "Specialty Shops & Floral",
+    },
+  },
+  {
+    ids: new Set(["tailor"]),
+    category: {
+      clusterId: "hospitality-retail-services",
+      sectorId: "retail-customer-service",
+      industry: "Apparel & Tailoring",
+    },
+  },
+  {
+    ids: new Set(["analytical-chemist", "chemist"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Chemistry Research",
+    },
+  },
+  {
+    ids: new Set(["cartographer", "geographer"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Geospatial Science",
+    },
+  },
+  {
+    ids: new Set(["forensic-scientist"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Forensic Science",
+    },
+  },
+  {
+    ids: new Set(["auto-mechanic", "aircraft-mechanic"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Automotive & Aviation Repair",
+    },
+  },
+  {
+    ids: new Set(["welder"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Metalwork & Fabrication",
+    },
+  },
+  {
+    ids: new Set(["painter", "tile-setter"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Painting & Finishing",
+    },
+  },
+  {
+    ids: new Set(["childcare-worker"]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "education-training",
+      industry: "Early Childhood Education",
+    },
+  },
+  {
+    ids: new Set(["healthcare-administrator"]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "medical-clinical",
+      industry: "Healthcare Administration",
+    },
+  },
+  {
+    ids: new Set(["nutritionist", "dietitian"]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "medical-clinical",
+      industry: "Nutrition & Dietetics",
+    },
+  },
+  {
+    ids: new Set(["researcher-clinical", "clinical-lab-technician"]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "medical-clinical",
+      industry: "Clinical Research",
+    },
+  },
+  {
+    ids: new Set(["veterinarian", "vet-tech"]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "medical-clinical",
+      industry: "Veterinary Medicine",
+    },
+  },
+  {
+    ids: new Set(["mortician"]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "mental-health-social",
+      industry: "Funeral Services & Bereavement Support",
+    },
+  },
+  {
+    ids: new Set(["model-fashion"]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "performing-arts",
+      industry: "Fashion & Modeling",
+    },
+  },
+  {
+    ids: new Set(["archivist", "librarian"]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "museums-archives-history",
+      industry: "Archives & Library Science",
+    },
+  },
+  {
+    ids: new Set(["museum-curator"]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "museums-archives-history",
+      industry: "Museums & Curation",
+    },
+  },
+  {
+    ids: new Set(["historian", "anthropologist"]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "museums-archives-history",
+      industry: "History & Cultural Preservation",
     },
   },
   {
