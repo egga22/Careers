@@ -1,5 +1,5 @@
 // Shared career metadata for the interactive map and detail pages
-window.careersData = [
+const baseCareers = [
   { id: "accountant", name: "Accountant", medianSalary: 78000 },
   { id: "actuary", name: "Actuary", medianSalary: 115000 },
   { id: "administrative-assistant", name: "Administrative Assistant", medianSalary: 42000 },
@@ -230,3 +230,745 @@ window.careersData = [
   { id: "writer-author", name: "Writer/Author", medianSalary: 69000 },
   { id: "zoologist", name: "Zoologist", medianSalary: 76000 }
 ];
+
+const careerTaxonomy = {
+  clusters: [
+    {
+      id: "stem-technical",
+      name: "STEM & Technical",
+      sectors: [
+        {
+          id: "software-it",
+          name: "Software & IT",
+          industries: [
+            "Software Development",
+            "Cybersecurity",
+            "IT Support",
+            "Artificial Intelligence",
+          ],
+        },
+        {
+          id: "engineering",
+          name: "Engineering",
+          industries: [
+            "Chemical Engineering",
+            "Mechanical Engineering",
+            "Electrical Engineering",
+            "Civil Engineering",
+          ],
+        },
+        {
+          id: "science-research",
+          name: "Science & Research",
+          industries: [
+            "Biotechnology",
+            "Environmental Science",
+            "Physics Research",
+            "Data Science",
+          ],
+        },
+        {
+          id: "math-analytics",
+          name: "Math & Analytics",
+          industries: [
+            "Mathematics",
+            "Statistics",
+            "Quantitative Analysis",
+            "Financial Modeling",
+          ],
+        },
+      ],
+    },
+    {
+      id: "business-finance",
+      name: "Business & Finance",
+      sectors: [
+        {
+          id: "management",
+          name: "Management",
+          industries: [
+            "Corporate Management",
+            "Human Resources",
+            "Operations Management",
+          ],
+        },
+        {
+          id: "finance-investing",
+          name: "Finance & Investing",
+          industries: ["Investment Banking", "Accounting", "Insurance", "Real Estate"],
+        },
+        {
+          id: "marketing-sales",
+          name: "Marketing & Sales",
+          industries: ["Marketing", "Advertising", "Sales", "Public Relations"],
+        },
+        {
+          id: "entrepreneurship-operations",
+          name: "Entrepreneurship & Operations",
+          industries: [
+            "Startups",
+            "Small Business",
+            "E-commerce",
+            "Supply Chain & Logistics",
+          ],
+        },
+      ],
+    },
+    {
+      id: "arts-media-communication",
+      name: "Arts, Media & Communication",
+      sectors: [
+        {
+          id: "visual-arts-design",
+          name: "Visual Arts & Design",
+          industries: ["Graphic Design", "Animation", "Photography", "Illustration"],
+        },
+        {
+          id: "performing-arts",
+          name: "Performing Arts",
+          industries: ["Music Production", "Acting", "Dance", "Theatre Production"],
+        },
+        {
+          id: "writing-journalism",
+          name: "Writing, Journalism & Communications",
+          industries: ["Journalism", "Copywriting", "Editing", "Broadcast Media"],
+        },
+      ],
+    },
+    {
+      id: "health-human-services",
+      name: "Health & Human Services",
+      sectors: [
+        {
+          id: "medical-clinical",
+          name: "Medical & Clinical",
+          industries: ["Nursing", "Medicine", "Dentistry", "Pharmacy"],
+        },
+        {
+          id: "mental-health-social",
+          name: "Mental Health & Social Services",
+          industries: [
+            "Mental Health Counseling",
+            "Social Work",
+            "Rehabilitation Services",
+            "Public Health",
+          ],
+        },
+        {
+          id: "education-training",
+          name: "Education & Training",
+          industries: [
+            "Early Childhood Education",
+            "K–12 Teaching",
+            "Special Education",
+            "Tutoring & Academic Support",
+          ],
+        },
+      ],
+    },
+    {
+      id: "trades-law-public-operations",
+      name: "Trades, Law, and Public Operations",
+      sectors: [
+        {
+          id: "skilled-trades",
+          name: "Skilled Trades",
+          industries: ["Construction", "Carpentry", "Electricians", "Plumbing"],
+        },
+        {
+          id: "legal",
+          name: "Law & Legal Services",
+          industries: ["Law", "Paralegal Services", "Compliance", "Legal Research"],
+        },
+        {
+          id: "public-safety-government",
+          name: "Public Safety & Government",
+          industries: [
+            "Law Enforcement",
+            "Firefighting",
+            "Military & Defense",
+            "Emergency Management",
+          ],
+        },
+      ],
+    },
+  ],
+};
+
+const categoryRules = [
+  {
+    ids: new Set([
+      "software-engineer",
+      "frontend-developer",
+      "web-developer",
+      "game-developer",
+      "computer-programmer",
+      "product-manager",
+      "quality-assurance-tester",
+      "software-tester",
+      "database-administrator",
+      "network-engineer",
+      "computer-network-architect",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "software-it",
+      industry: "Software Development",
+    },
+  },
+  {
+    ids: new Set(["information-security-analyst", "cryptographer"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "software-it",
+      industry: "Cybersecurity",
+    },
+  },
+  {
+    ids: new Set(["it-support-specialist", "customer-support-agent"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "software-it",
+      industry: "IT Support",
+    },
+  },
+  {
+    ids: new Set(["data-scientist", "data-analyst", "data-engineer"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "software-it",
+      industry: "Artificial Intelligence",
+    },
+  },
+  {
+    ids: new Set(["chemical-engineer"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "engineering",
+      industry: "Chemical Engineering",
+    },
+  },
+  {
+    ids: new Set([
+      "mechanical-engineer",
+      "industrial-engineer",
+      "maintenance-technician",
+      "machinist",
+      "industrial-designer",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "engineering",
+      industry: "Mechanical Engineering",
+    },
+  },
+  {
+    ids: new Set([
+      "computer-hardware-engineer",
+      "electrician",
+      "hvac-technician",
+      "cable-technician",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "engineering",
+      industry: "Electrical Engineering",
+    },
+  },
+  {
+    ids: new Set([
+      "civil-engineer",
+      "structural-engineer",
+      "aerospace-engineer",
+      "environmental-engineer",
+      "nuclear-engineer",
+      "nuclear-technician",
+      "architect",
+      "architecture-drafter",
+      "building-inspector",
+      "land-surveyor",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "engineering",
+      industry: "Civil Engineering",
+    },
+  },
+  {
+    ids: new Set([
+      "biochemist",
+      "chemist",
+      "biomedical-engineer",
+      "medical-scientist",
+      "food-scientist",
+      "microbiologist",
+      "genetic-counselor",
+      "medical-assistant",
+      "clinical-lab-technician",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Biotechnology",
+    },
+  },
+  {
+    ids: new Set([
+      "environmental-engineer",
+      "geologist",
+      "park-ranger",
+      "marine-biologist",
+      "zoologist",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Environmental Science",
+    },
+  },
+  {
+    ids: new Set([
+      "physicist",
+      "astronomer",
+      "meteorologist",
+      "nuclear-engineer",
+      "nuclear-technician",
+      "scientist-research",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Physics Research",
+    },
+  },
+  {
+    ids: new Set([
+      "data-scientist",
+      "statistician",
+      "mathematician",
+      "data-analyst",
+      "budget-analyst",
+      "economist",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "science-research",
+      industry: "Data Science",
+    },
+  },
+  {
+    ids: new Set(["mathematician", "actuary"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "math-analytics",
+      industry: "Mathematics",
+    },
+  },
+  {
+    ids: new Set(["statistician"]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "math-analytics",
+      industry: "Statistics",
+    },
+  },
+  {
+    ids: new Set([
+      "financial-analyst",
+      "financial-advisor",
+      "stockbroker",
+      "political-scientist",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "math-analytics",
+      industry: "Quantitative Analysis",
+    },
+  },
+  {
+    ids: new Set([
+      "economist",
+      "budget-analyst",
+      "management-analyst",
+      "logistician",
+      "supply-chain-manager",
+    ]),
+    category: {
+      clusterId: "stem-technical",
+      sectorId: "math-analytics",
+      industry: "Financial Modeling",
+    },
+  },
+  {
+    ids: new Set([
+      "project-manager",
+      "management-analyst",
+      "consultant-management",
+      "restaurant-manager",
+      "hotel-manager",
+      "office-manager",
+      "construction-manager",
+      "principal",
+    ]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "management",
+      industry: "Corporate Management",
+    },
+  },
+  {
+    ids: new Set(["hr-manager", "administrative-assistant", "office-manager"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "management",
+      industry: "Human Resources",
+    },
+  },
+  {
+    ids: new Set(["logistician", "supply-chain-manager", "truck-driver"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "management",
+      industry: "Operations Management",
+    },
+  },
+  {
+    ids: new Set(["accountant", "tax-preparer", "budget-analyst", "actuary"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "finance-investing",
+      industry: "Accounting",
+    },
+  },
+  {
+    ids: new Set(["financial-analyst", "financial-advisor", "stockbroker", "loan-officer"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "finance-investing",
+      industry: "Investment Banking",
+    },
+  },
+  {
+    ids: new Set(["insurance-agent", "claims-adjuster"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "finance-investing",
+      industry: "Insurance",
+    },
+  },
+  {
+    ids: new Set(["real-estate-agent", "real-estate-broker"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "finance-investing",
+      industry: "Real Estate",
+    },
+  },
+  {
+    ids: new Set([
+      "marketing-manager",
+      "seo-specialist",
+      "social-media-manager",
+      "content-creator",
+      "event-planner",
+      "public-relations-specialist",
+    ]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "marketing-sales",
+      industry: "Marketing",
+    },
+  },
+  {
+    ids: new Set(["sales-manager", "sales-representative"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "marketing-sales",
+      industry: "Sales",
+    },
+  },
+  {
+    ids: new Set(["public-relations-specialist"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "marketing-sales",
+      industry: "Public Relations",
+    },
+  },
+  {
+    ids: new Set([
+      "business-owner-small",
+      "farmer",
+      "barber",
+      "baker",
+      "butcher",
+      "florist",
+      "fashion-designer",
+      "cosmetologist",
+      "makeup-artist",
+      "hair-stylist",
+      "groundskeeper",
+      "janitor",
+      "waiter",
+      "bartender",
+      "tour-guide",
+      "tax-preparer",
+      "restaurant-manager",
+      "hotel-manager",
+      "chef",
+      "cookie-decorator",
+    ]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "entrepreneurship-operations",
+      industry: "Small Business",
+    },
+  },
+  {
+    ids: new Set(["logistician", "supply-chain-manager", "courier", "truck-driver"]),
+    category: {
+      clusterId: "business-finance",
+      sectorId: "entrepreneurship-operations",
+      industry: "Supply Chain & Logistics",
+    },
+  },
+  {
+    ids: new Set([
+      "graphic-designer",
+      "illustrator",
+      "animator",
+      "motion-graphics-designer",
+      "art-director",
+      "artist-fine",
+      "industrial-designer",
+      "fashion-designer",
+      "interior-designer",
+      "photographer",
+      "videographer",
+      "editor-video",
+      "architect",
+      "architecture-drafter",
+      "ui-ux-designer",
+    ]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "visual-arts-design",
+      industry: "Graphic Design",
+    },
+  },
+  {
+    ids: new Set(["music-producer", "sound-designer", "audio-engineer", "musician"]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "performing-arts",
+      industry: "Music Production",
+    },
+  },
+  {
+    ids: new Set(["writer-author", "book-editor", "journalist", "technical-writer", "translator", "interpreter"]),
+    category: {
+      clusterId: "arts-media-communication",
+      sectorId: "writing-journalism",
+      industry: "Journalism",
+    },
+  },
+  {
+    ids: new Set([
+      "doctor-family",
+      "doctor-surgeon",
+      "dentist",
+      "dental-hygienist",
+      "dental-assistant",
+      "nurse-practitioner",
+      "registered-nurse",
+      "medical-assistant",
+      "lab-technician",
+      "clinical-lab-technician",
+      "radiologic-technologist",
+      "pharmacist",
+      "ultrasound-technician",
+      "paramedic",
+      "emt",
+      "midwife",
+      "physician-assistant",
+      "optometrist",
+      "oncologist",
+      "ophthalmologist",
+      "neurologist",
+      "pathologist",
+      "dietitian",
+      "chiropractor",
+      "occupational-therapist",
+      "therapist-occupational",
+      "therapist-physical",
+      "physical-therapist",
+      "speech-pathologist",
+      "ultrasound-technician",
+    ]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "medical-clinical",
+      industry: "Medicine",
+    },
+  },
+  {
+    ids: new Set([
+      "psychologist",
+      "psychiatrist",
+      "therapist-mental-health",
+      "school-counselor",
+      "social-worker",
+    ]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "mental-health-social",
+      industry: "Mental Health Counseling",
+    },
+  },
+  {
+    ids: new Set([
+      "home-health-aide",
+      "physical-therapist",
+      "occupational-therapist",
+      "massage-therapist",
+      "athletic-trainer",
+    ]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "mental-health-social",
+      industry: "Rehabilitation Services",
+    },
+  },
+  {
+    ids: new Set([
+      "teacher-highschool",
+      "elementary-teacher",
+      "tutor",
+      "professor",
+      "coach-sports",
+      "school-counselor",
+      "principal",
+    ]),
+    category: {
+      clusterId: "health-human-services",
+      sectorId: "education-training",
+      industry: "K–12 Teaching",
+    },
+  },
+  {
+    ids: new Set([
+      "construction-laborer",
+      "construction-manager",
+      "bricklayer",
+      "carpenter",
+      "ironworker",
+      "roofer",
+      "safety-inspector",
+      "surveyor",
+    ]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Construction",
+    },
+  },
+  {
+    ids: new Set(["carpenter", "tile-setter"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Carpentry",
+    },
+  },
+  {
+    ids: new Set(["electrician", "hvac-technician", "cable-technician"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Electricians",
+    },
+  },
+  {
+    ids: new Set(["plumber", "pipefitter"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "skilled-trades",
+      industry: "Plumbing",
+    },
+  },
+  {
+    ids: new Set(["lawyer", "judge", "paralegal", "court-reporter", "detective", "homicide-detective"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "legal",
+      industry: "Law",
+    },
+  },
+  {
+    ids: new Set(["investigator-private", "political-scientist"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "legal",
+      industry: "Legal Research",
+    },
+  },
+  {
+    ids: new Set([
+      "police-officer",
+      "detective",
+      "homicide-detective",
+      "security-guard",
+    ]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "public-safety-government",
+      industry: "Law Enforcement",
+    },
+  },
+  {
+    ids: new Set(["firefighter", "safety-inspector"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "public-safety-government",
+      industry: "Firefighting",
+    },
+  },
+  {
+    ids: new Set(["military-officer", "pilot-commercial", "air-traffic-controller"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "public-safety-government",
+      industry: "Military & Defense",
+    },
+  },
+  {
+    ids: new Set(["emt", "paramedic", "dispatcher", "correctional-officer", "probation-officer"]),
+    category: {
+      clusterId: "trades-law-public-operations",
+      sectorId: "public-safety-government",
+      industry: "Emergency Management",
+    },
+  },
+];
+
+const defaultCategory = {
+  clusterId: "business-finance",
+  sectorId: "entrepreneurship-operations",
+  industry: "Small Business",
+};
+
+function applyCategory(id) {
+  for (const rule of categoryRules) {
+    if (rule.ids.has(id)) {
+      return rule.category;
+    }
+  }
+  return defaultCategory;
+}
+
+window.careersData = baseCareers.map((career) => ({
+  ...career,
+  ...applyCategory(career.id),
+}));
+
+window.careerTaxonomy = careerTaxonomy;

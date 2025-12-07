@@ -1,4 +1,6 @@
-const careers = window.careersData || [];
+const allCareers = window.careersData || [];
+let filteredCareers = [...allCareers];
+const taxonomy = window.careerTaxonomy || { clusters: [] };
 
 const svg = document.getElementById("map");
 const tooltip = document.getElementById("tooltip");
@@ -7,6 +9,9 @@ const yAxisSelect = document.getElementById("y-axis");
 const xScaleSelect = document.getElementById("x-scale");
 const yScaleSelect = document.getElementById("y-scale");
 const bubbleLabelSelect = document.getElementById("bubble-label");
+const clusterFilterSelect = document.getElementById("cluster-filter");
+const sectorFilterSelect = document.getElementById("sector-filter");
+const industryFilterSelect = document.getElementById("industry-filter");
 const zoomInBtn = document.getElementById("zoom-in");
 const zoomOutBtn = document.getElementById("zoom-out");
 const resetViewBtn = document.getElementById("reset-view");
@@ -23,6 +28,7 @@ const state = {
   xScaleType: xScaleSelect.value,
   yScaleType: yScaleSelect.value,
   labelMode: bubbleLabelSelect.value,
+  filters: { cluster: "all", sector: "all", industry: "all" },
   scale: 1,
   translate: { x: 0, y: 0 },
 };
@@ -61,9 +67,100 @@ zoomGroup.appendChild(axesGroup);
 const pointsGroup = document.createElementNS("http://www.w3.org/2000/svg", "g");
 zoomGroup.appendChild(pointsGroup);
 
+function getCurrentCareers() {
+  return filteredCareers.length ? filteredCareers : allCareers;
+}
+
+function buildSelectOptions(select, options) {
+  select.innerHTML = "";
+  options.forEach(({ value, label }) => {
+    const option = document.createElement("option");
+    option.value = value;
+    option.textContent = label;
+    select.appendChild(option);
+  });
+}
+
+function populateClusterSelect() {
+  const clusterOptions = [
+    { value: "all", label: "All Clusters" },
+    ...taxonomy.clusters.map((cluster) => ({
+      value: cluster.id,
+      label: cluster.name,
+    })),
+  ];
+
+  buildSelectOptions(clusterFilterSelect, clusterOptions);
+}
+
+function populateSectorSelect(clusterId) {
+  const sectors = clusterId === "all"
+    ? taxonomy.clusters.flatMap((cluster) => cluster.sectors)
+    : taxonomy.clusters.find((cluster) => cluster.id === clusterId)?.sectors || [];
+
+  const sectorOptions = [{ value: "all", label: "All Sectors" },
+    ...sectors.map((sector) => ({ value: sector.id, label: sector.name }))];
+
+  buildSelectOptions(sectorFilterSelect, sectorOptions);
+}
+
+function populateIndustrySelect(sectorId, clusterId) {
+  let industries = [];
+
+  if (sectorId === "all") {
+    const sectors = clusterId === "all"
+      ? taxonomy.clusters.flatMap((cluster) => cluster.sectors)
+      : taxonomy.clusters.find((cluster) => cluster.id === clusterId)?.sectors || [];
+    industries = sectors.flatMap((sector) => sector.industries);
+  } else {
+    const cluster = taxonomy.clusters.find((c) => c.id === clusterId) ||
+      taxonomy.clusters.find((c) => c.sectors.some((s) => s.id === sectorId));
+    industries = cluster?.sectors.find((sector) => sector.id === sectorId)?.industries || [];
+  }
+
+  const options = [{ value: "all", label: "All Industries" },
+    ...industries.map((industry) => ({ value: industry, label: industry }))];
+
+  buildSelectOptions(industryFilterSelect, options);
+}
+
+function applyFilters() {
+  filteredCareers = allCareers.filter((career) => {
+    if (state.filters.cluster !== "all" && career.clusterId !== state.filters.cluster) {
+      return false;
+    }
+    if (state.filters.sector !== "all" && career.sectorId !== state.filters.sector) {
+      return false;
+    }
+    if (state.filters.industry !== "all" && career.industry !== state.filters.industry) {
+      return false;
+    }
+    return true;
+  });
+}
+
+function findClusterById(clusterId) {
+  return taxonomy.clusters.find((cluster) => cluster.id === clusterId);
+}
+
+function findSectorById(sectorId) {
+  return taxonomy.clusters
+    .flatMap((cluster) => cluster.sectors.map((sector) => ({ ...sector, clusterId: cluster.id })))
+    .find((sector) => sector.id === sectorId);
+}
+
+function getClusterName(clusterId) {
+  return findClusterById(clusterId)?.name || clusterId || "N/A";
+}
+
+function getSectorName(sectorId) {
+  return findSectorById(sectorId)?.name || sectorId || "N/A";
+}
+
 function getAlphabeticalOrder(name) {
-  const sorted = [...careers].sort((a, b) => a.name.localeCompare(b.name));
-  return sorted.findIndex((career) => career.name === name) + 1;
+  const sorted = [...getCurrentCareers()].sort((a, b) => a.name.localeCompare(b.name));
+  const index = sorted.findIndex((career) => career.name === name);
+  return index === -1 ? 0 : index + 1;
 }
 
 function metricValue(career, metric) {
@@ -75,9 +172,13 @@ function metricValue(career, metric) {
 
 function metricDomain(metric) {
   if (metric === "alphabetical") {
-    return [1, careers.length];
+    const count = getCurrentCareers().length;
+    return [count ? 1 : 0, count || 1];
   }
-  const values = careers.map((c) => c.medianSalary);
+  const values = getCurrentCareers().map((c) => c.medianSalary);
+  if (!values.length) {
+    return [0, 1];
+  }
   const min = Math.min(...values);
   const max = Math.max(...values);
   const padding = (max - min) * 0.05;
@@ -234,7 +335,7 @@ function formatTick(metric, value) {
 function drawPoints(xScale, yScale) {
   pointsGroup.innerHTML = "";
 
-  careers.forEach((career) => {
+  filteredCareers.forEach((career) => {
     const xValue = metricValue(career, state.xMetric);
     const yValue = metricValue(career, state.yMetric);
 
@@ -295,6 +396,8 @@ function showTooltip(event, career, cx, cy) {
     <span class="metric">X (${metricConfig[state.xMetric].label}): ${metricConfig[state.xMetric].formatter(xValue)}</span>
     <span class="metric">Y (${metricConfig[state.yMetric].label}): ${metricConfig[state.yMetric].formatter(yValue)}</span>
     <span class="metric">Median Salary: ${metricConfig.salary.formatter(career.medianSalary)}</span>
+    <span class="metric">Cluster: ${getClusterName(career.clusterId)}</span>
+    <span class="metric">Sector: ${getSectorName(career.sectorId)} · Industry: ${career.industry}</span>
   `;
   tooltip.classList.add("visible");
   tooltip.setAttribute("aria-hidden", "false");
@@ -389,9 +492,42 @@ bubbleLabelSelect.addEventListener("change", () => {
   render();
 });
 
+clusterFilterSelect.addEventListener("change", () => {
+  state.filters.cluster = clusterFilterSelect.value;
+  state.filters.sector = "all";
+  state.filters.industry = "all";
+  populateSectorSelect(state.filters.cluster);
+  sectorFilterSelect.value = state.filters.sector;
+  populateIndustrySelect(state.filters.sector, state.filters.cluster);
+  industryFilterSelect.value = state.filters.industry;
+  applyFilters();
+  render();
+});
+
+sectorFilterSelect.addEventListener("change", () => {
+  state.filters.sector = sectorFilterSelect.value;
+  state.filters.industry = "all";
+  populateIndustrySelect(state.filters.sector, state.filters.cluster);
+  industryFilterSelect.value = state.filters.industry;
+  applyFilters();
+  render();
+});
+
+industryFilterSelect.addEventListener("change", () => {
+  state.filters.industry = industryFilterSelect.value;
+  applyFilters();
+  render();
+});
+
 zoomInBtn.addEventListener("click", () => handleZoom("in"));
 zoomOutBtn.addEventListener("click", () => handleZoom("out"));
 resetViewBtn.addEventListener("click", resetView);
 
+populateClusterSelect();
+populateSectorSelect(state.filters.cluster);
+sectorFilterSelect.value = state.filters.sector;
+populateIndustrySelect(state.filters.sector, state.filters.cluster);
+industryFilterSelect.value = state.filters.industry;
+applyFilters();
 applyZoom();
 render();
