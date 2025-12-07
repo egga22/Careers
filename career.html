@@ -61,12 +61,57 @@
         })
         .join("<br>");
 
+      const salaryRangeText = career.salaryRange
+        ? `${formatCurrency(career.salaryRange.min)} - ${formatCurrency(career.salaryRange.max)}`
+        : "Coming soon";
+
+      const salaryDistribution = career.salaryDistribution?.percentiles || {};
+      const distributionList = Object.entries(salaryDistribution)
+        .sort(([aKey], [bKey]) => Number(aKey) - Number(bKey))
+        .map(
+          ([percentile, value]) => `
+            <li><span class=\"pill-label\">P${percentile}</span> ${formatCurrency(value)}</li>
+          `
+        )
+        .join("");
+
+      const universitiesList = (career.topUniversities || [])
+        .map((school) => `<li class=\"pill\">${school}</li>`)
+        .join("");
+
       container.innerHTML = `
-        <h2>${career.name}</h2>
-        <p class="muted">Median Salary</p>
-        <p class="salary">${formatCurrency(career.medianSalary)}</p>
-        <p class="note">${categoryList}</p>
-        <p class="note">More details will appear here as the database grows.</p>
+        <div class="detail-top">
+          <div>
+            <h2>${career.name}</h2>
+            <p class="note">${categoryList}</p>
+          </div>
+          <a class="action-link" href="${career.linkedinUrl}" target="_blank" rel="noopener noreferrer">Search on LinkedIn</a>
+        </div>
+
+        <div class="metric-grid">
+          <div class="metric-card">
+            <p class="muted">Median Salary</p>
+            <p class="salary">${formatCurrency(career.medianSalary)}</p>
+            <p class="note">Typical range: ${salaryRangeText}</p>
+          </div>
+          <div class="metric-card">
+            <p class="muted">Stress Level</p>
+            <p class="metric-highlight">${career.stressLevel}</p>
+            <p class="note">Based on industry expectations.</p>
+          </div>
+          <div class="metric-card">
+            <p class="muted">Salary Distribution</p>
+            <ul class="pill-list">${distributionList}</ul>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <h3>Top Universities</h3>
+            <p class="note">Programs commonly aligned with this career path.</p>
+          </div>
+          <ul class="pill-list">${universitiesList}</ul>
+        </div>
       `;
     }
 

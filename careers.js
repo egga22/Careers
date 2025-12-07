@@ -1304,6 +1304,59 @@ const defaultCategory = {
   industry: "Small Business",
 };
 
+const clusterUniversityMap = {
+  "stem-technical": [
+    "Massachusetts Institute of Technology",
+    "Stanford University",
+    "Carnegie Mellon University",
+    "Georgia Institute of Technology",
+    "University of California, Berkeley",
+  ],
+  "hospitality-retail-services": [
+    "Cornell University",
+    "University of Nevada, Las Vegas",
+    "Michigan State University",
+    "Purdue University",
+    "Johnson & Wales University",
+  ],
+  "health-human-services": [
+    "Johns Hopkins University",
+    "University of Pennsylvania",
+    "Duke University",
+    "University of California, San Francisco",
+    "Columbia University",
+  ],
+  "business-finance": [
+    "University of Pennsylvania (Wharton)",
+    "Harvard University",
+    "New York University",
+    "University of Chicago",
+    "University of Michigan",
+  ],
+  "arts-media-communication": [
+    "Rhode Island School of Design",
+    "Savannah College of Art and Design",
+    "University of California, Los Angeles",
+    "New York University (Tisch)",
+    "School of the Art Institute of Chicago",
+  ],
+  "trades-law-public-operations": [
+    "Georgetown University",
+    "University of California, Berkeley",
+    "University of Virginia",
+    "University of Michigan",
+    "University of Texas at Austin",
+  ],
+};
+
+const defaultUniversities = [
+  "University of California, Berkeley",
+  "University of Michigan",
+  "University of Washington",
+  "Carnegie Mellon University",
+  "University of Texas at Austin",
+];
+
 function applyCategories(id) {
   const categories = categoryRules
     .filter((rule) => rule.ids.has(id))
@@ -1316,11 +1369,68 @@ function applyCategories(id) {
   return [defaultCategory];
 }
 
+function deriveStressLevel(medianSalary) {
+  if (medianSalary >= 180000) return "Very High";
+  if (medianSalary >= 120000) return "High";
+  if (medianSalary >= 80000) return "Moderate";
+  return "Manageable";
+}
+
+function deriveSalaryRange(medianSalary) {
+  const spread = Math.max(12000, Math.round(medianSalary * 0.3));
+  const halfSpread = Math.round(spread / 2);
+  const min = Math.max(25000, medianSalary - halfSpread);
+  const max = medianSalary + halfSpread;
+
+  return { min, max };
+}
+
+function deriveSalaryDistribution(medianSalary) {
+  const factors = {
+    10: 0.7,
+    25: 0.85,
+    50: 1,
+    75: 1.18,
+    90: 1.32,
+  };
+
+  const percentiles = Object.fromEntries(
+    Object.entries(factors).map(([percentile, factor]) => [
+      percentile,
+      Math.round(medianSalary * factor),
+    ])
+  );
+
+  return { percentiles };
+}
+
+function deriveUniversities(clusterIds) {
+  const lists = clusterIds
+    .map((clusterId) => clusterUniversityMap[clusterId])
+    .filter(Boolean);
+
+  if (lists.length) {
+    return [...new Set(lists.flat())];
+  }
+
+  return defaultUniversities;
+}
+
+function buildLinkedInUrl(name) {
+  const encodedName = encodeURIComponent(name);
+  return `https://www.linkedin.com/jobs/search/?keywords=${encodedName}`;
+}
+
 window.careersData = baseCareers.map((career) => {
   const categories = applyCategories(career.id);
   const clusterIds = [...new Set(categories.map((category) => category.clusterId))];
   const sectorIds = [...new Set(categories.map((category) => category.sectorId))];
   const industries = [...new Set(categories.map((category) => category.industry))];
+  const salaryRange = career.salaryRange || deriveSalaryRange(career.medianSalary);
+  const salaryDistribution = career.salaryDistribution || deriveSalaryDistribution(career.medianSalary);
+  const stressLevel = career.stressLevel || deriveStressLevel(career.medianSalary);
+  const topUniversities = career.topUniversities || deriveUniversities(clusterIds);
+  const linkedinUrl = career.linkedinUrl || buildLinkedInUrl(career.name);
 
   return {
     ...career,
@@ -1328,6 +1438,11 @@ window.careersData = baseCareers.map((career) => {
     clusterIds,
     sectorIds,
     industries,
+    salaryRange,
+    salaryDistribution,
+    stressLevel,
+    topUniversities,
+    linkedinUrl,
   };
 });
 

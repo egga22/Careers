@@ -263,6 +263,99 @@ button:active {
   color: var(--muted);
 }
 
+.detail-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.action-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #12345a;
+  color: #eaf4ff;
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 700;
+  border: 1px solid rgba(98, 176, 232, 0.3);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+}
+
+.action-link:hover {
+  background: #15406f;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.metric-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.metric-highlight {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 6px 0 10px;
+}
+
+.panel {
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+  padding: 16px;
+}
+
+.panel-header {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 10px;
+}
+
+.panel h3 {
+  margin: 0;
+}
+
+.pill-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  background: rgba(98, 176, 232, 0.1);
+  border: 1px solid rgba(98, 176, 232, 0.35);
+  color: #eaf4ff;
+  border-radius: 999px;
+  padding: 8px 12px;
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.pill-label {
+  display: inline-block;
+  min-width: 42px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 999px;
+  padding: 6px 10px;
+  margin-right: 6px;
+  font-weight: 700;
+}
+
 .back-link {
   color: var(--accent);
   text-decoration: none;
