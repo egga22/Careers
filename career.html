@@ -39,7 +39,19 @@
     }
 
     function formatCurrency(amount) {
+      if (typeof amount !== "number" || Number.isNaN(amount)) {
+        return "N/A";
+      }
       return `$${amount.toLocaleString()}`;
+    }
+
+    function formatCurrencyRange(range) {
+      return `${formatCurrency(range.low)} – ${formatCurrency(range.high)}`;
+    }
+
+    function buildLinkedInUrl(title) {
+      const keywordQuery = encodeURIComponent(title).replace(/%20/g, "+");
+      return `https://www.linkedin.com/jobs/search/?keywords=${keywordQuery}`;
     }
 
     function renderCareer() {
@@ -61,10 +73,30 @@
         })
         .join("<br>");
 
+      const salaryDistribution = career.salaryDistribution || {};
+
       container.innerHTML = `
         <h2>${career.name}</h2>
         <p class="muted">Median Salary</p>
         <p class="salary">${formatCurrency(career.medianSalary)}</p>
+        <p class="muted">Salary Range</p>
+        <p>${formatCurrencyRange(career.salaryRange)}</p>
+        <p class="muted">Salary Distribution</p>
+        <ul>
+          <li>10th percentile: ${formatCurrency(salaryDistribution.tenthPercentile)}</li>
+          <li>25th percentile: ${formatCurrency(salaryDistribution.twentyFifthPercentile)}</li>
+          <li>Median: ${formatCurrency(salaryDistribution.median)}</li>
+          <li>75th percentile: ${formatCurrency(salaryDistribution.seventyFifthPercentile)}</li>
+          <li>90th percentile: ${formatCurrency(salaryDistribution.ninetiethPercentile)}</li>
+        </ul>
+        <p class="muted">Stress Level</p>
+        <p>${career.stressLevel}</p>
+        <p class="muted">Top Universities</p>
+        <ul>
+          ${career.topUniversities.map((school) => `<li>${school}</li>`).join("")}
+        </ul>
+        <p class="muted">LinkedIn Search</p>
+        <p><a href="${buildLinkedInUrl(career.name)}" target="_blank" rel="noopener">Search ${career.name} jobs on LinkedIn</a></p>
         <p class="note">${categoryList}</p>
         <p class="note">More details will appear here as the database grows.</p>
       `;

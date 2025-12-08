@@ -1304,6 +1304,113 @@ const defaultCategory = {
   industry: "Small Business",
 };
 
+const sectorStressLevels = {
+  "software-it": "Moderate",
+  engineering: "High",
+  "science-research": "Moderate",
+  "math-analytics": "Moderate",
+  management: "Moderate",
+  "finance-investing": "High",
+  "marketing-sales": "Moderate",
+  "entrepreneurship-operations": "High",
+  "visual-arts-design": "Moderate",
+  "performing-arts": "Moderate",
+  "writing-journalism": "Moderate",
+  "museums-archives-history": "Low",
+  "medical-clinical": "High",
+  "mental-health-social": "High",
+  "education-training": "Moderate",
+  "food-beverage-service": "Moderate",
+  "hospitality-tourism": "Moderate",
+  "personal-wellness-services": "Low",
+  "facilities-outdoor": "Low",
+  "retail-customer-service": "Moderate",
+  "skilled-trades": "High",
+  legal: "High",
+  "public-safety-government": "High",
+};
+
+const clusterUniversities = {
+  "stem-technical": ["MIT", "Stanford", "Carnegie Mellon"],
+  "business-finance": ["Wharton", "Harvard Business School", "University of Chicago Booth"],
+  "arts-media-communication": ["RISD", "Savannah College of Art and Design", "NYU Tisch"],
+  "health-human-services": ["Johns Hopkins", "Mayo Clinic School", "UCSF"],
+  "hospitality-retail-services": ["University of Nevada, Las Vegas", "Cornell (Hotel)"],
+  "trades-law-public-operations": ["Georgetown", "Naval Academy", "Georgia Tech"],
+};
+
+const sectorUniversities = {
+  "software-it": ["MIT", "Stanford", "UC Berkeley"],
+  engineering: ["Georgia Tech", "Purdue", "Michigan"],
+  "science-research": ["Caltech", "Harvard", "Princeton"],
+  "math-analytics": ["UChicago", "Columbia", "NYU"],
+  management: ["Wharton", "Harvard Business School", "MIT Sloan"],
+  "finance-investing": ["Wharton", "NYU Stern", "London School of Economics"],
+  "marketing-sales": ["Northwestern Kellogg", "USC Marshall", "UT Austin"],
+  "entrepreneurship-operations": ["Babson", "Stanford", "Berkeley Haas"],
+  "visual-arts-design": ["RISD", "Parsons", "SCAD"],
+  "performing-arts": ["Juilliard", "Berklee College of Music", "NYU Tisch"],
+  "writing-journalism": ["Northwestern Medill", "Columbia Journalism", "Missouri"],
+  "museums-archives-history": ["University of Michigan", "University of Washington", "UNC Chapel Hill"],
+  "medical-clinical": ["Johns Hopkins", "Mayo Clinic School", "Harvard Medical School"],
+  "mental-health-social": ["Columbia", "UCLA", "University of Pennsylvania"],
+  "education-training": ["Vanderbilt Peabody", "Teachers College (Columbia)", "UCLA"],
+  "food-beverage-service": ["Culinary Institute of America", "Johnson & Wales", "ICE"],
+  "hospitality-tourism": ["Cornell Hotel School", "UNLV", "Michigan State"],
+  "personal-wellness-services": ["Bastyr University", "University of Florida", "Arizona State"],
+  "facilities-outdoor": ["Oregon State", "Colorado State", "Texas A&M"],
+  "retail-customer-service": ["Ohio State", "Michigan State", "University of Arizona"],
+  "skilled-trades": ["Dunwoody College of Technology", "Ferris State", "Wentworth Institute of Technology"],
+  legal: ["Harvard Law", "Yale Law", "Georgetown Law"],
+  "public-safety-government": ["Naval Academy", "West Point", "Texas A&M"],
+};
+
+function deriveStressLevel(sectorIds, clusterIds) {
+  const sectorStress = sectorIds.map((id) => sectorStressLevels[id]).find(Boolean);
+  if (sectorStress) {
+    return sectorStress;
+  }
+
+  const clusterStress = clusterIds.includes("arts-media-communication") ? "Moderate" : null;
+  return clusterStress || "Moderate";
+}
+
+function deriveSalaryRange(medianSalary) {
+  const spread = Math.max(10000, Math.round(medianSalary * 0.35));
+  const low = Math.max(25000, medianSalary - Math.round(spread / 2));
+  return {
+    low,
+    median: medianSalary,
+    high: medianSalary + Math.round(spread / 2),
+  };
+}
+
+function deriveSalaryDistribution(medianSalary) {
+  const range = deriveSalaryRange(medianSalary);
+  return {
+    tenthPercentile: Math.max(20000, Math.round(range.low * 0.85)),
+    twentyFifthPercentile: range.low,
+    median: range.median,
+    seventyFifthPercentile: range.high,
+    ninetiethPercentile: Math.round(range.high * 1.15),
+  };
+}
+
+function deriveUniversities(clusterIds, sectorIds) {
+  const sectorMatches = sectorIds
+    .map((sectorId) => sectorUniversities[sectorId])
+    .find((schools) => Array.isArray(schools));
+  if (sectorMatches) {
+    return sectorMatches;
+  }
+
+  const clusterMatches = clusterIds
+    .map((clusterId) => clusterUniversities[clusterId])
+    .find((schools) => Array.isArray(schools));
+
+  return clusterMatches || ["University of Washington", "Ohio State", "Arizona State"];
+}
+
 function applyCategories(id) {
   const categories = categoryRules
     .filter((rule) => rule.ids.has(id))
@@ -1321,6 +1428,9 @@ window.careersData = baseCareers.map((career) => {
   const clusterIds = [...new Set(categories.map((category) => category.clusterId))];
   const sectorIds = [...new Set(categories.map((category) => category.sectorId))];
   const industries = [...new Set(categories.map((category) => category.industry))];
+  const salaryRange = deriveSalaryRange(career.medianSalary);
+
+  const topUniversities = deriveUniversities(clusterIds, sectorIds);
 
   return {
     ...career,
@@ -1328,6 +1438,10 @@ window.careersData = baseCareers.map((career) => {
     clusterIds,
     sectorIds,
     industries,
+    stressLevel: deriveStressLevel(sectorIds, clusterIds),
+    salaryRange,
+    salaryDistribution: deriveSalaryDistribution(career.medianSalary),
+    topUniversities,
   };
 });
 
