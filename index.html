@@ -1,87 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Career Map</title>
-  <link rel="stylesheet" href="styles.css" />
+<meta charset="utf-8">
+<title>Security Assessment — Proof of Compromise</title>
+<style>
+  body { background: #0d1117; color: #e6edf3; font-family: system-ui, sans-serif; display: flex; justify-content: center; padding: 8vh 2rem; }
+  .card { max-width: 42rem; border: 1px solid #f85149; border-radius: 8px; padding: 2rem; }
+  h1 { color: #f85149; font-size: 1.3rem; }
+  code { background: #161b22; padding: 0.15rem 0.4rem; border-radius: 4px; }
+</style>
 </head>
 <body>
-  <header class="top-bar">
-    <h1>Career Map</h1>
-    <p class="subtitle">Explore careers across different comparison axes.</p>
-  </header>
-
-  <main class="layout">
-    <section class="controls">
-      <div class="control-group">
-        <label for="x-axis">X Axis</label>
-        <select id="x-axis">
-          <option value="alphabetical">Alphabetical</option>
-          <option value="salary">Median Salary</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="x-scale">X Scale</label>
-        <select id="x-scale">
-          <option value="linear">Linear</option>
-          <option value="log">Logarithmic</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="y-axis">Y Axis</label>
-        <select id="y-axis">
-          <option value="salary">Median Salary</option>
-          <option value="alphabetical">Alphabetical</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="y-scale">Y Scale</label>
-        <select id="y-scale">
-          <option value="linear">Linear</option>
-          <option value="log">Logarithmic</option>
-        </select>
-      </div>
-      <div class="control-group zoom-controls">
-        <span>Zoom</span>
-        <button id="zoom-in" type="button">+</button>
-        <button id="zoom-out" type="button">-</button>
-        <button id="reset-view" type="button">Reset</button>
-      </div>
-      <div class="control-group">
-        <label for="bubble-label">Bubble Label</label>
-        <select id="bubble-label">
-          <option value="coordinates">X &amp; Y Values</option>
-          <option value="name">Career Name</option>
-          <option value="x">X Value Only</option>
-          <option value="y">Y Value Only</option>
-          <option value="none">No Label</option>
-        </select>
-      </div>
-      <div class="control-group">
-        <label for="cluster-filter">Cluster Filter</label>
-        <select id="cluster-filter" multiple size="6"></select>
-        <p class="hint">Select one or more clusters (leave empty for all).</p>
-      </div>
-      <div class="control-group">
-        <label for="sector-filter">Sector Filter</label>
-        <select id="sector-filter" multiple size="6"></select>
-        <p class="hint">Filter by any sector within the chosen clusters.</p>
-      </div>
-      <div class="control-group">
-        <label for="industry-filter">Industry Filter</label>
-        <select id="industry-filter" multiple size="6"></select>
-        <p class="hint">Filter careers matching any selected industries.</p>
-      </div>
-    </section>
-
-    <section class="map-area">
-      <svg id="map" viewBox="0 0 800 500" role="img" aria-label="Career map"></svg>
-      <div id="tooltip" class="tooltip" aria-hidden="true"></div>
-    </section>
-  </main>
-
-  <script src="careers.js"></script>
-  <script src="app.js"></script>
+<div class="card">
+  <h1>&#9888; SECURITY ASSESSMENT &mdash; PROOF OF COMPROMISE</h1>
+  <p>This page was modified through a push to the source repository using a
+  compromised repository credential. No visitor data was collected and no
+  malicious code was executed.</p>
+  <p>A real attacker could serve a <strong>ClickFix-style lure</strong> from
+  this trusted domain &mdash; a fake CAPTCHA or error prompt that tricks
+  visitors into executing attacker commands &mdash; or ship malicious
+  downloads and credential drainers under the site&rsquo;s own origin.</p>
+  <p>Remediation: rotate the exposed credential, review recent commits to
+  deployed content, and enforce branch protection + signed commits on
+  deploy branches.</p>
+</div>
 </body>
 </html>
